@@ -13,7 +13,7 @@ public class StageManager : MonoBehaviour
     {
         WALL,
         GROUND,
-        BLOCK_pOINT,
+        BLOCK_POINT,
         BLOCK,
         PLAYER,
     }
@@ -88,11 +88,71 @@ public class StageManager : MonoBehaviour
         }
     }
 
-
+//スクリーンに描画するときに使う関数
     public Vector2 GetScreenPositionFromTileTable(Vector2Int position)
     {
         return new Vector2(position.x * tileSize - centerPostion.x, -(position.y * tileSize - centerPostion.y));
     }
-    // Update is called once per frame
+    
+    public bool IsWall(Vector2Int position)
+    {
+        if(tileTable[position.x,position.y] == TILE_TYPE.WALL)
+        {
+            return true;
+        }
+        return false;
+    }
 
+      public bool IsBlock(Vector2Int position)
+    {
+        if(tileTable[position.x,position.y] == TILE_TYPE.BLOCK)
+        {
+            return true;
+        }
+        return false;
+    }
+
+//ぶつかったblockを取得する関数を作成
+GameObject GetBlockObjAt(Vector2Int position)
+{
+    //Dictionaryの性質を利用
+    //pair key is obj value is positionが入っている
+    foreach(var pair in moveObjPositionOnTile)
+    {
+        if(pair.Value == position)
+        {
+            return pair.Key;
+        }
+    }
+    return null;
+}
+
+//Blockを移動させる
+
+public void UpdateBlockPosition(Vector2Int currentBlockPosition, Vector2Int nextBlockPosition)
+{
+    //blockの取得
+    GameObject block = GetBlockObjAt(currentBlockPosition);
+    //blockを移動する
+    block.transform.position = GetScreenPositionFromTileTable(nextBlockPosition);
+   //位置データの修正
+    moveObjPositionOnTile[block] = nextBlockPosition;
+
+    //tileTableの更新
+    //次にブロックがおかれる場所をBlockとする
+    tileTable[nextBlockPosition.x,nextBlockPosition.y] = TILE_TYPE.BLOCK;
+
+    
+}
+
+public void UpdateTileTableForPlayer(Vector2Int nextPosition,Vector2Int currentPosition)
+{
+    
+    //tiletableの更新
+    //次にブロックがおかれる場所をPlayerとする
+     tileTable[nextPosition.x,nextPosition.y] = TILE_TYPE.PLAYER;
+    //現在の場所をGORUNDとする
+     tileTable[currentPosition.x,currentPosition.y] = TILE_TYPE.GROUND;
+
+}
 }

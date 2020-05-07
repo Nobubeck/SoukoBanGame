@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GamaManager : MonoBehaviour
-{
-    [SerializeField] StageManager stage;
-    PlayerManager player;
+public class GameManager : MonoBehaviour
+{ 
+ [SerializeField] StageManager stage;
+   [SerializeField] PlayerManager player;
 
     enum DIRECTION
     {
@@ -60,6 +60,25 @@ public class GamaManager : MonoBehaviour
         Vector2Int currentPlayerPositionOnTile = stage.moveObjPositionOnTile[player.gameObject];
         //Debug.Log(currentPlayerPositionOnTile);
         Vector2Int nextPlayerPositionOnTile = GetNextPositionOnTile(currentPlayerPositionOnTile, direction);
+       //Playerの移動先がWALL?
+        if(stage.IsWall(nextPlayerPositionOnTile));
+        {
+            return;//処理をここで終了させる
+        }
+
+        //Playerの移動先がBLOCK?
+         if(stage.IsBlock(nextPlayerPositionOnTile))
+        {
+            Vector2Int nextBlockPositionOnTile = GetNextPositionOnTile(nextPlayerPositionOnTile,direction);
+            if(stage.IsWall(nextBlockPositionOnTile) || stage.IsBlock(nextBlockPositionOnTile))
+            {
+                return;
+            }
+            stage.UpdateBlockPosition(nextPlayerPositionOnTile,nextBlockPositionOnTile);
+        }
+
+        stage.UpdateTileTableForPlayer(currentPlayerPositionOnTile,nextPlayerPositionOnTile);
+      
 
         //現実世界にプレイヤーの移動を反映
         player.Move(stage.GetScreenPositionFromTileTable(nextPlayerPositionOnTile));
@@ -85,3 +104,4 @@ public class GamaManager : MonoBehaviour
         return curretnPosition;
     }
 }
+
